@@ -1,0 +1,650 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// COMPANIES & USERS
+// ============================================
+
+model Company {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  name              String
+  legalName         String?
+  type              String   @default("PROPRIETORSHIP")
+  panNumber         String?  @unique
+  gstNumber         String?  @unique
+  esiCode           String?
+  epfCode           String?
+  cinNumber         String?
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  district          String?
+  state             String   @default("West Bengal")
+  pincode           String?
+  bankName          String?
+  bankBranch        String?
+  bankAccountNumber String?
+  bankIfscCode      String?
+  establishedYear   Int?
+  primarySector     String[] @default(["CIVIL"])
+  contractorClass   String?
+  financialLimit    Decimal? @db.Decimal(15, 2)
+  authSignatoryName String?
+  authSignatoryDesignation String?
+  planType          String   @default("FREE")
+  planExpiresAt     DateTime?
+  
+  users             User[]
+  documents         CompanyDocument[]
+  tenderTracks      TenderTrack[]
+  projects          Project[]
+  staff             StaffMember[]
+  machinery         Machinery[]
+  vendors           Vendor[]
+  registrations     ContractorRegistration[]
+  preferences       CompanyPreference?
+  pastWorks         PastWork[]
+  generatedDocs     GeneratedDocument[]
+  complianceRecords ComplianceRecord[]
+  uploadedTenders   Tender[] @relation("UploadedBy")
+  
+  @@map("companies")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  email        String   @unique
+  phone        String?
+  name         String
+  role         String   @default("OWNER")
+  isActive     Boolean  @default(true)
+  supabaseId   String   @unique
+  language     String   @default("BENGALI")
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  chatSessions ChatSession[]
+  activityLogs ActivityLog[]
+  
+  @@map("users")
+}
+
+model CompanyPreference {
+  id                   String   @id @default(cuid())
+  updatedAt            DateTime @updatedAt
+  companyId            String   @unique
+  company              Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  preferredStates      String[] @default(["West Bengal"])
+  preferredDistricts   String[]
+  preferredSectors     String[] @default(["CIVIL_BUILDING"])
+  preferredDepartments String[]
+  minTenderValue       Decimal? @db.Decimal(15, 2)
+  maxTenderValue       Decimal? @db.Decimal(15, 2)
+  preferenceNotes      String?
+  parsedPreferences    Json?
+  notifyEmail          Boolean  @default(true)
+  notifyWhatsApp       Boolean  @default(false)
+  notifySMS            Boolean  @default(false)
+  notifyMinScore       Int      @default(70)
+  
+  @@map("company_preferences")
+}
+
+model ContractorRegistration {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department     String
+  registrationNo String
+  class          String?
+  category       String?
+  validFrom      DateTime
+  validUntil     DateTime
+  financialLimit Decimal? @db.Decimal(15, 2)
+  documentId     String?
+  
+  @@map("contractor_registrations")
+}
+
+// ============================================
+// COMPANY DOCUMENTS (VAULT)
+// ============================================
+
+model CompanyDocument {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category      String
+  subCategory   String?
+  name          String
+  fileUrl       String
+  filePath      String
+  fileSize      Int?
+  mimeType      String?
+  pageCount     Int?
+  rawText       String?
+  extractedData Json?
+  isProcessed   Boolean  @default(false)
+  isVerified    Boolean  @default(false)
+  issueDate     DateTime?
+  expiryDate    DateTime?
+  isExpired     Boolean  @default(false)
+  version       Int      @default(1)
+  isLatest      Boolean  @default(true)
+  previousId    String?
+  notes         String?
+  
+  @@map("company_documents")
+}
+
+model PastWork {
+  id                   String   @id @default(cuid())
+  createdAt            DateTime @default(now())
+  companyId            String
+  company              Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workName             String
+  department           String
+  workOrderNumber      String?
+  workOrderDate        DateTime?
+  sector               String
+  subSector            String?
+  workNature           String?
+  contractValue        Decimal  @db.Decimal(15, 2)
+  startDate            DateTime?
+  completionDate       DateTime?
+  location             String?
+  district             String?
+  state                String?
+  workOrderDocId       String?
+  completionCertDocId  String?
+  performanceCertDocId String?
+  isCompleted          Boolean  @default(true)
+  performanceRating    String?
+  keywords             String[]
+  
+  @@map("past_works")
+}
+
+model StaffMember {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name            String
+  designation     String
+  qualification   String?
+  experienceYears Int?
+  aadhaarNumber   String?
+  panNumber       String?
+  phone           String?
+  email           String?
+  monthlySalary   Decimal? @db.Decimal(10, 2)
+  qualificationCertId String?
+  isActive        Boolean  @default(true)
+  joiningDate     DateTime?
+  
+  @@map("staff_members")
+}
+
+model Machinery {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name           String
+  category       String
+  make           String?
+  model          String?
+  yearOfMfg      Int?
+  ownershipType  String   @default("OWNED")
+  registrationNo String?
+  rcDocumentId   String?
+  hourlyRate     Decimal? @db.Decimal(10, 2)
+  isActive       Boolean  @default(true)
+  
+  @@map("machinery")
+}
+
+model Vendor {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  type          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  gstNumber     String?
+  address       String?
+  supplyItems   String[]
+  rating        Int?
+  isActive      Boolean  @default(true)
+  
+  @@map("vendors")
+}
+
+// ============================================
+// TENDERS (UPLOADED BY USER)
+// ============================================
+
+model Tender {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  uploadedById        String
+  uploadedBy          Company   @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: Cascade)
+  sourceType          String    @default("USER_UPLOAD")
+  sourcePortal        String?
+  sourceUrl           String?
+  originalFileUrl     String?
+  originalFilePath    String?
+  originalFileName    String?
+  tenderNumber        String?
+  nitNumber           String?
+  department          String?
+  organization        String?
+  subOrganization     String?
+  workName            String
+  workDescription     String?
+  workLocation        String?
+  district            String?
+  state               String?
+  sector              String?
+  subSector           String?
+  estimatedCost       Decimal?  @db.Decimal(15, 2)
+  emdAmount           Decimal?  @db.Decimal(15, 2)
+  emdType             String?
+  tenderFee           Decimal?  @db.Decimal(10, 2)
+  tenderFeeMode       String?
+  publishedDate       DateTime?
+  preBidMeetingDate   DateTime?
+  lastSubmissionDate  DateTime?
+  openingDate         DateTime?
+  completionPeriod    String?
+  completionDays      Int?
+  eligibilityCriteria Json?
+  requiredClass       String?
+  requiredTurnover    Decimal?  @db.Decimal(15, 2)
+  requiredExperience  String?
+  requiredStaff       Json?
+  requiredMachinery   Json?
+  securityDepositPct  Decimal?  @db.Decimal(5, 2)
+  performanceGuarPct  Decimal?  @db.Decimal(5, 2)
+  mobilizationAdv     Boolean   @default(false)
+  mobilizationAdvPct  Decimal?  @db.Decimal(5, 2)
+  paymentTerms        String?
+  priceEscalation     Boolean   @default(false)
+  ldClause            String?
+  defectLiabilityPeriod String?
+  disputeResolution   String?
+  rawText             String?
+  aiSummaryEn         String?
+  aiSummaryBn         String?
+  aiSummaryHi         String?
+  keyHighlights       Json?
+  riskFlags           Json?
+  requiredDocuments   Json?
+  extractedData       Json?
+  processingStatus    String    @default("PENDING")
+  processingError     String?
+  processedAt         DateTime?
+  isActive            Boolean   @default(true)
+  
+  documents           TenderDocument[]
+  boqItems            BOQItem[]
+  tracks              TenderTrack[]
+  
+  @@map("tenders")
+}
+
+model TenderDocument {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  tenderId     String
+  tender       Tender   @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  name         String
+  documentType String
+  fileUrl      String
+  filePath     String
+  fileSize     Int?
+  mimeType     String?
+  pageCount    Int?
+  isProcessed  Boolean  @default(false)
+  
+  @@map("tender_documents")
+}
+
+model BOQItem {
+  id              String   @id @default(cuid())
+  tenderId        String
+  tender          Tender   @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  slNo            String
+  description     String
+  unit            String?
+  quantity        Decimal? @db.Decimal(15, 3)
+  sorRate         Decimal? @db.Decimal(15, 2)
+  marketRate      Decimal? @db.Decimal(15, 2)
+  suggestedRate   Decimal? @db.Decimal(15, 2)
+  userRate        Decimal? @db.Decimal(15, 2)
+  rateAnalysis    Json?
+  estimatedAmount Decimal? @db.Decimal(15, 2)
+  userBidAmount   Decimal? @db.Decimal(15, 2)
+  parentId        String?
+  parent          BOQItem? @relation("BOQNested", fields: [parentId], references: [id], onDelete: Cascade)
+  children        BOQItem[] @relation("BOQNested")
+  sortOrder       Int      @default(0)
+  
+  @@map("boq_items")
+}
+
+model TenderTrack {
+  id                 String    @id @default(cuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  companyId          String
+  company            Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenderId           String
+  tender             Tender    @relation(fields: [tenderId], references: [id], onDelete: Cascade)
+  status             String    @default("DISCOVERED")
+  matchScore         Int?
+  eligibilityStatus  String?
+  eligibilityDetails Json?
+  decisionScore      Int?
+  recommendation     String?
+  userNotes          String?
+  skippedReason      String?
+  bidPercentage      Decimal?  @db.Decimal(5, 2)
+  bidAmount          Decimal?  @db.Decimal(15, 2)
+  submittedAt        DateTime?
+  submissionRef      String?
+  resultStatus       String?
+  l1Amount           Decimal?  @db.Decimal(15, 2)
+  ourAmount          Decimal?  @db.Decimal(15, 2)
+  l1Bidder           String?
+  project            Project?
+  
+  @@unique([companyId, tenderId])
+  @@map("tender_tracks")
+}
+
+// ============================================
+// PROJECTS
+// ============================================
+
+model Project {
+  id                   String   @id @default(cuid())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  companyId            String
+  company              Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenderTrackId        String?  @unique
+  tenderTrack          TenderTrack? @relation(fields: [tenderTrackId], references: [id])
+  name                 String
+  projectCode          String?
+  department           String
+  workOrderNumber      String?
+  workOrderDate        DateTime?
+  contractValue        Decimal  @db.Decimal(15, 2)
+  startDate            DateTime?
+  completionDate       DateTime?
+  actualCompletionDate DateTime?
+  dlpEndDate           DateTime?
+  status               String   @default("ACTIVE")
+  progressPercent      Decimal? @db.Decimal(5, 2)
+  totalBilled          Decimal  @db.Decimal(15, 2) @default(0)
+  totalReceived        Decimal  @db.Decimal(15, 2) @default(0)
+  totalExpenses        Decimal  @db.Decimal(15, 2) @default(0)
+  sdDeducted           Decimal  @db.Decimal(15, 2) @default(0)
+  sdReleased           Decimal  @db.Decimal(15, 2) @default(0)
+  
+  bills                RABill[]
+  expenses             ProjectExpense[]
+  boqProgress          ProjectBOQProgress[]
+  attendance           AttendanceRecord[]
+  materials            MaterialLedger[]
+  
+  @@map("projects")
+}
+
+model ProjectBOQProgress {
+  id             String   @id @default(cuid())
+  updatedAt      DateTime @updatedAt
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  boqItemId      String
+  slNo           String
+  description    String
+  unit           String?
+  contractQty    Decimal  @db.Decimal(15, 3)
+  rate           Decimal  @db.Decimal(15, 2)
+  totalCompleted Decimal  @db.Decimal(15, 3) @default(0)
+  lastBilledQty  Decimal  @db.Decimal(15, 3) @default(0)
+  
+  @@map("project_boq_progress")
+}
+
+// ============================================
+// BILLING
+// ============================================
+
+model RABill {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  projectId        String
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  billNumber       String
+  billType         String   @default("RA")
+  billDate         DateTime @default(now())
+  periodFrom       DateTime?
+  periodTo         DateTime?
+  grossAmount      Decimal  @db.Decimal(15, 2) @default(0)
+  sdDeduction      Decimal  @db.Decimal(15, 2) @default(0)
+  itTdsDeduction   Decimal  @db.Decimal(15, 2) @default(0)
+  gstTdsDeduction  Decimal  @db.Decimal(15, 2) @default(0)
+  labourCess       Decimal  @db.Decimal(15, 2) @default(0)
+  royaltyDeduction Decimal  @db.Decimal(15, 2) @default(0)
+  advanceRecovery  Decimal  @db.Decimal(15, 2) @default(0)
+  otherDeductions  Decimal  @db.Decimal(15, 2) @default(0)
+  ldDeduction      Decimal  @db.Decimal(15, 2) @default(0)
+  netPayable       Decimal  @db.Decimal(15, 2) @default(0)
+  gstAmount        Decimal  @db.Decimal(15, 2) @default(0)
+  gstRate          Decimal  @db.Decimal(5, 2)  @default(18)
+  gstInvoiceNumber String?
+  status           String   @default("DRAFT")
+  submittedDate    DateTime?
+  paymentDate      DateTime?
+  paymentAmount    Decimal? @db.Decimal(15, 2)
+  paymentReference String?
+  billDocumentUrl  String?
+  billItems        RABillItem[]
+  
+  @@map("ra_bills")
+}
+
+model RABillItem {
+  id            String  @id @default(cuid())
+  billId        String
+  bill          RABill  @relation(fields: [billId], references: [id], onDelete: Cascade)
+  boqItemId     String?
+  slNo          String?
+  description   String
+  unit          String?
+  totalQty      Decimal @db.Decimal(15, 3)
+  prevBilledQty Decimal @db.Decimal(15, 3) @default(0)
+  currentQty    Decimal @db.Decimal(15, 3)
+  rate          Decimal @db.Decimal(15, 2)
+  amount        Decimal @db.Decimal(15, 2)
+  
+  @@map("ra_bill_items")
+}
+
+// ============================================
+// ATTENDANCE & MATERIALS
+// ============================================
+
+model AttendanceRecord {
+  id            String   @id @default(cuid())
+  date          DateTime
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workerName    String
+  workerAadhaar String?
+  skillType     String
+  status        String
+  overtimeHours Decimal? @db.Decimal(4, 2)
+  dailyWage     Decimal  @db.Decimal(10, 2)
+  
+  @@map("attendance_records")
+}
+
+model MaterialLedger {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date            DateTime
+  transactionType String
+  itemName        String
+  category        String
+  unit            String
+  quantity        Decimal  @db.Decimal(15, 3)
+  rate            Decimal? @db.Decimal(15, 2)
+  amount          Decimal? @db.Decimal(15, 2)
+  vendorName      String?
+  billNumber      String?
+  vehicleNumber   String?
+  boqItemId       String?
+  workDescription String?
+  
+  @@map("material_ledger")
+}
+
+model ProjectExpense {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date          DateTime
+  category      String
+  description   String
+  vendorName    String?
+  billNumber    String?
+  amount        Decimal  @db.Decimal(15, 2)
+  gstAmount     Decimal? @db.Decimal(15, 2)
+  totalAmount   Decimal  @db.Decimal(15, 2)
+  paymentStatus String   @default("PENDING")
+  receiptUrl    String?
+  isOcrProcessed Boolean @default(false)
+  
+  @@map("project_expenses")
+}
+
+// ============================================
+// CHAT
+// ============================================
+
+model ChatSession {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String?
+  language        String   @default("BENGALI")
+  activeTenderId  String?
+  activeProjectId String?
+  messages        ChatMessage[]
+  
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  sessionId  String
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String
+  content    String
+  language   String?
+  actionType String?
+  actionData Json?
+  isHelpful  Boolean?
+  
+  @@map("chat_messages")
+}
+
+// ============================================
+// COMPLIANCE
+// ============================================
+
+model ComplianceRecord {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  projectId     String?
+  type          String
+  period        String
+  dueDate       DateTime
+  filedDate     DateTime?
+  amount        Decimal? @db.Decimal(15, 2)
+  paidAmount    Decimal? @db.Decimal(15, 2)
+  challanNumber String?
+  receiptUrl    String?
+  status        String   @default("PENDING")
+  notes         String?
+  
+  @@map("compliance_records")
+}
+
+// ============================================
+// SYSTEM
+// ============================================
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action     String
+  entityType String?
+  entityId   String?
+  details    Json?
+  
+  @@map("activity_logs")
+}
+
+model GeneratedDocument {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenderId      String?
+  projectId     String?
+  type          String
+  name          String
+  fileUrl       String
+  filePath      String
+  generatedFrom Json?
+  version       Int      @default(1)
+  isLatest      Boolean  @default(true)
+  
+  @@map("generated_documents")
+}

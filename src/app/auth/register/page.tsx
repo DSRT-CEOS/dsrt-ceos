@@ -10,13 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Building2, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
+import { Building2, Loader2, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
 
   const [userData, setUserData] = useState({ name: "", email: "", phone: "", password: "" });
@@ -33,14 +34,34 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg("");
+    
     try {
       const supabase = createClient();
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
+        options: {
+          data: {
+            full_name: userData.name,
+          },
+        },
       });
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("User creation failed");
+      
+      if (authError) {
+        if (authError.message.includes("rate limit")) {
+          throw new Error("Too many signup attempts. Please wait 1 hour or use a different email address.");
+        }
+        if (authError.message.includes("already registered")) {
+          throw new Error("This email is already registered. Please sign in instead.");
+        }
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error("User creation failed - no user returned");
+      }
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -52,13 +73,29 @@ export default function RegisterPage() {
       });
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Registration failed");
+      
+      if (!result.success) {
+        throw new Error(result.error || "Database registration failed");
+      }
 
       toast.success("Welcome to DSRT CEOS!");
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      if (signInError) {
+        toast("Account created. Please sign in.", { icon: "ℹ️" });
+        router.push("/auth/login");
+        return;
+      }
+
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Registration failed";
+      setErrorMsg(msg);
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -79,6 +116,13 @@ export default function RegisterPage() {
           </div>
           <p className="text-slate-500 text-sm mt-2">Step {step} of 2</p>
         </Link>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-red-400 text-sm">{errorMsg}</p>
+          </div>
+        )}
 
         <Card>
           <CardContent className="pt-6">

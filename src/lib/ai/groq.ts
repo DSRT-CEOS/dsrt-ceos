@@ -45,7 +45,7 @@ export async function generateText(
   return completion.choices[0]?.message?.content || "";
 }
 
-export async function generateJSON<T = any>(
+export async function generateJSON<T = Record<string, unknown>>(
   systemPrompt: string,
   userPrompt: string,
   options: AIOptions = {}
@@ -57,8 +57,8 @@ export async function generateJSON<T = any>(
   });
   try {
     return JSON.parse(text) as T;
-  } catch (e) {
-    console.error("JSON parse error:", text);
+  } catch (err) {
+    console.error("JSON parse error:", text, err);
     throw new Error("AI returned invalid JSON");
   }
 }

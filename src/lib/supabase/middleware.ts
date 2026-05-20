@@ -26,19 +26,17 @@ export async function updateSession(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
   const path = request.nextUrl.pathname;
-  const isAuthPage = path.startsWith("/auth");
-  const isApiAuth = path.startsWith("/api/auth");
-  const isPublic = path.startsWith("/api/public") || path === "/";
 
-  if (!user && !isAuthPage && !isApiAuth && !isPublic) {
+  // Protect /dashboard routes
+  if (!user && path.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPage && !path.includes("/callback")) {
+  // Redirect logged-in users away from auth pages
+  if (user && (path === "/auth/login" || path === "/auth/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

@@ -17,52 +17,32 @@ export async function POST(request: NextRequest) {
     });
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const company = dbUser.company;
+    const c = dbUser.company;
+    const systemPrompt = `You are CEOS, AI assistant for Indian construction enterprises.
 
-    const systemPrompt = `You are CEOS, an AI assistant for Indian construction enterprises.
+COMPANY: ${c.name} | Type: ${c.type} | Class: ${c.contractorClass || "Not set"} | City: ${c.city || ""}, ${c.state}
 
-COMPANY: ${company.name}
-- Type: ${company.type}
-- Class: ${company.contractorClass || "Not set"}
-- Location: ${company.city || ""}, ${company.state}
-- PAN: ${company.panNumber || "Not set"}
-- GST: ${company.gstNumber || "Not set"}
+EXPERTISE: Indian government tendering (PWD, CPWD, Railway, MES, GeM), CPWD SOR, BOQ analysis, GST 18%, TDS 2%, ESI 3.25%+0.75%, EPF 12%+12%, RA Bill deductions (SD, IT-TDS, GST-TDS, Labour Cess 1%), WB e-Tender portal.
 
-YOUR EXPERTISE:
-- Indian government tendering (NIT, BOQ, PWD, CPWD, Railway, MES, GeM)
-- Construction estimation, CPWD Schedule of Rates
-- GST 18%, TDS 2%, ESI 3.25%, EPF 12%
-- RA Bill preparation with all deductions
-- West Bengal PWD processes specifically
-
-RULES:
-- If user writes in Bengali, respond in Bengali
-- If user writes in Hindi, respond in Hindi
-- If user writes in English, respond in English
-- Be practical like an experienced construction manager
-- Show calculations step by step
-- Keep responses concise but complete`;
-
-    const messages = [
-      ...history.slice(-8).map((h: { role: string; content: string }) => ({
-        role: h.role as "user" | "assistant",
-        content: h.content,
-      })),
-      { role: "user" as const, content: message },
-    ];
+LANGUAGE RULE: Detect language from user input. Reply in SAME language. Bengali→Bengali, Hindi→Hindi, English→English. Be practical and specific.`;
 
     const completion = await groq.chat.completions.create({
       model: MODELS.BALANCED,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...history.slice(-8).map((h: { role: string; content: string }) => ({
+          role: h.role as "user" | "assistant",
+          content: h.content,
+        })),
+        { role: "user", content: message },
+      ],
       temperature: 0.4,
       max_tokens: 1024,
     });
 
-    const response = completion.choices[0]?.message?.content || "Sorry, I could not process your request.";
-
+    const response = completion.choices[0]?.message?.content || "Sorry, could not process request.";
     return NextResponse.json({ success: true, response });
   } catch (err: unknown) {
-    console.error("Chat error:", err);
     const msg = err instanceof Error ? err.message : "Chat failed";
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }

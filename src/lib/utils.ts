@@ -15,6 +15,18 @@ export function formatCurrency(amount: number | null | undefined): string {
   return "Rs " + num.toFixed(0);
 }
 
+export function getDaysLeft(date: Date | string | null | undefined): number {
+  if (!date) return 0;
+  return Math.ceil((new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+export function getDeadlineColor(daysLeft: number): string {
+  if (daysLeft < 0) return "text-red-500";
+  if (daysLeft <= 3) return "text-red-400";
+  if (daysLeft <= 7) return "text-yellow-400";
+  return "text-green-400";
+}
+
 export function getInitials(name: string): string {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
 }
@@ -22,8 +34,6 @@ export function getInitials(name: string): string {
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return "N/A";
   return new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+    day: "2-digit", month: "short", year: "numeric",
   });
 }

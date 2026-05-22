@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Bell, LogOut, User, ChevronDown, Search, FileText, Building2, Receipt, FolderOpen, Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import RoleBadge from "@/components/shared/RoleBadge";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
@@ -116,7 +117,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
                         <FileText className="w-4 h-4 text-blue-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm truncate">{t.workName}</p>
-                          <p className="text-slate-500 text-xs">{t.department || ""} {t.nitNumber && `· ${t.nitNumber}`}</p>
+                          <p className="text-slate-500 text-xs">{t.department || ""} {t.nitNumber && `Â· ${t.nitNumber}`}</p>
                         </div>
                       </button>
                     ))}
@@ -130,7 +131,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
                         <Building2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm truncate">{p.name}</p>
-                          <p className="text-slate-500 text-xs">{p.department} · {p.status}</p>
+                          <p className="text-slate-500 text-xs">{p.department} Â· {p.status}</p>
                         </div>
                       </button>
                     ))}
@@ -144,7 +145,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
                         <Receipt className="w-4 h-4 text-orange-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm truncate">{b.billNumber}</p>
-                          <p className="text-slate-500 text-xs">{b.project?.name} · {formatCurrency(b.netPayable)}</p>
+                          <p className="text-slate-500 text-xs">{b.project?.name} Â· {formatCurrency(b.netPayable)}</p>
                         </div>
                       </button>
                     ))}
@@ -199,7 +200,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
                       <div className="mt-2 space-y-1">
                         {n.items.slice(0, 3).map((item: any, idx: number) => (
                           <p key={idx} className="text-slate-400 text-xs truncate">
-                            • {item.workName || item.name || item.billNumber || item.department}
+                            â€¢ {item.workName || item.name || item.billNumber || item.department}
                           </p>
                         ))}
                       </div>
@@ -210,6 +211,7 @@ export default function TopBar({ userEmail }: { userEmail: string }) {
             </div>
           )}
         </div>
+        <RoleBadge />
 
         {/* User menu */}
         <DropdownMenu>

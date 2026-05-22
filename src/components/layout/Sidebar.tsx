@@ -3,20 +3,41 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarChart3, Settings, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrentUser } from "@/lib/hooks/useUser";
+import { hasPermission, type Role } from "@/lib/auth/roles";
 
-const nav = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: any;
+  label: string;
+  module?: string;
+  action?: string;
+}
+
+const allNav: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
-  { name: "Tenders", href: "/dashboard/tenders", icon: Search, label: "Upload & analyze" },
-  { name: "Documents", href: "/dashboard/documents", icon: FolderOpen, label: "Company vault" },
-  { name: "Projects", href: "/dashboard/projects", icon: Building2, label: "Active projects" },
-  { name: "Billing", href: "/dashboard/billing", icon: Receipt, label: "RA Bills" },
-  { name: "Compliance", href: "/dashboard/compliance", icon: Shield, label: "ESI EPF GST" },
-  { name: "Reports", href: "/dashboard/reports", icon: BarChart3, label: "Analytics" },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings, label: "Profile & prefs" },
+  { name: "Tenders", href: "/dashboard/tenders", icon: Search, label: "Upload & analyze", module: "tenders", action: "view" },
+  { name: "Documents", href: "/dashboard/documents", icon: FolderOpen, label: "Company vault", module: "documents", action: "view" },
+  { name: "Projects", href: "/dashboard/projects", icon: Building2, label: "Active projects", module: "projects", action: "view" },
+  { name: "Billing", href: "/dashboard/billing", icon: Receipt, label: "RA Bills", module: "bills", action: "view" },
+  { name: "Compliance", href: "/dashboard/compliance", icon: Shield, label: "ESI EPF GST", module: "compliance", action: "view" },
+  { name: "Reports", href: "/dashboard/reports", icon: BarChart3, label: "Analytics", module: "reports", action: "view" },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings, label: "Profile and prefs", module: "settings", action: "view" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { role, loading } = useCurrentUser();
+
+  // Filter nav based on permissions
+  const visibleNav = loading
+    ? allNav
+    : allNav.filter(item => {
+        if (!item.module || !item.action) return true;
+        return hasPermission(role, item.module as any, item.action);
+      });
+
   return (
     <div className="w-56 bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0">
       <div className="p-4 border-b border-slate-800">
@@ -30,8 +51,9 @@ export default function Sidebar() {
           </div>
         </Link>
       </div>
+
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-        {nav.map((item) => {
+        {visibleNav.map((item) => {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
             <Link key={item.href} href={item.href}
@@ -48,6 +70,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
       <div className="p-3 border-t border-slate-800">
         <div className="bg-orange-500/5 border border-orange-500/10 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">

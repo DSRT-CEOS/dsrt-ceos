@@ -10,17 +10,12 @@ export async function GET() {
 
     const dbUser = await prisma.user.findUnique({
       where: { supabaseId: user.id },
-      include: {
-        company: {
-          include: { preferences: true },
-        },
-      },
+      include: { company: { select: { id: true, name: true } } }
     });
+    if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
     return NextResponse.json({ success: true, data: dbUser });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Error";
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

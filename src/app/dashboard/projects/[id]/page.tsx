@@ -5,7 +5,10 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building2, IndianRupee, FileText, Loader2, Plus, Trash2, Download, Eye, Receipt, TrendingUp } from "lucide-react";
+import {
+  ArrowLeft, Building2, IndianRupee, FileText, Loader2, Plus, Trash2,
+  Receipt, Users, Package, ClipboardCheck, Wallet
+} from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -36,6 +39,7 @@ export default function ProjectDetail() {
 
   const billedPct = project.contractValue ? (project.totalBilled / project.contractValue) * 100 : 0;
   const balance = project.totalBilled - project.totalReceived;
+  const profit = project.totalReceived - Number(project.totalExpenses || 0);
 
   return (
     <div className="space-y-5 max-w-6xl">
@@ -62,24 +66,64 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardContent className="p-4">
-          <p className="text-slate-500 text-xs uppercase">Contract Value</p>
-          <p className="text-xl font-bold text-white mt-1">{formatCurrency(project.contractValue)}</p>
+          <p className="text-slate-500 text-xs uppercase">Contract</p>
+          <p className="text-lg font-bold text-white mt-1">{formatCurrency(project.contractValue)}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
-          <p className="text-slate-500 text-xs uppercase">Total Billed</p>
-          <p className="text-xl font-bold text-orange-400 mt-1">{formatCurrency(project.totalBilled)}</p>
-          <p className="text-slate-600 text-xs mt-1">{billedPct.toFixed(1)}% complete</p>
+          <p className="text-slate-500 text-xs uppercase">Billed</p>
+          <p className="text-lg font-bold text-orange-400 mt-1">{formatCurrency(project.totalBilled)}</p>
+          <p className="text-slate-600 text-xs mt-1">{billedPct.toFixed(0)}%</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-slate-500 text-xs uppercase">Received</p>
-          <p className="text-xl font-bold text-green-400 mt-1">{formatCurrency(project.totalReceived)}</p>
+          <p className="text-lg font-bold text-green-400 mt-1">{formatCurrency(project.totalReceived)}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
-          <p className="text-slate-500 text-xs uppercase">Pending</p>
-          <p className="text-xl font-bold text-yellow-400 mt-1">{formatCurrency(balance)}</p>
+          <p className="text-slate-500 text-xs uppercase">Expenses</p>
+          <p className="text-lg font-bold text-red-400 mt-1">{formatCurrency(project.totalExpenses)}</p>
         </CardContent></Card>
+        <Card className={cn(profit > 0 ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/20")}>
+          <CardContent className="p-4">
+            <p className="text-slate-500 text-xs uppercase">Profit/Loss</p>
+            <p className={cn("text-lg font-bold mt-1", profit > 0 ? "text-green-400" : "text-red-400")}>{formatCurrency(profit)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Nav */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <Link href={`/dashboard/projects/${id}/workers`}>
+          <Card className="hover:border-orange-500/30 hover:bg-orange-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+            <Users className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+            <p className="text-white font-medium text-sm">Workers</p>
+          </CardContent></Card>
+        </Link>
+        <Link href={`/dashboard/projects/${id}/attendance`}>
+          <Card className="hover:border-green-500/30 hover:bg-green-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+            <ClipboardCheck className="w-6 h-6 text-green-400 mx-auto mb-2" />
+            <p className="text-white font-medium text-sm">Attendance</p>
+          </CardContent></Card>
+        </Link>
+        <Link href={`/dashboard/projects/${id}/wages`}>
+          <Card className="hover:border-yellow-500/30 hover:bg-yellow-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+            <Wallet className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+            <p className="text-white font-medium text-sm">Wages</p>
+          </CardContent></Card>
+        </Link>
+        <Link href={`/dashboard/projects/${id}/materials`}>
+          <Card className="hover:border-blue-500/30 hover:bg-blue-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+            <Package className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+            <p className="text-white font-medium text-sm">Materials</p>
+          </CardContent></Card>
+        </Link>
+        <Link href={`/dashboard/projects/${id}/expenses`}>
+          <Card className="hover:border-red-500/30 hover:bg-red-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+            <IndianRupee className="w-6 h-6 text-red-400 mx-auto mb-2" />
+            <p className="text-white font-medium text-sm">Expenses</p>
+          </CardContent></Card>
+        </Link>
       </div>
 
       <Card>

@@ -57,6 +57,7 @@ model Company {
   complianceRecords ComplianceRecord[]
   uploadedTenders   Tender[] @relation("UploadedBy")
   
+  workers           Worker[]
   @@map("companies")
 }
 
@@ -419,6 +420,7 @@ model Project {
   attendance           AttendanceRecord[]
   materials            MaterialLedger[]
   
+  workers              Worker[]
   @@map("projects")
 }
 
@@ -647,4 +649,29 @@ model GeneratedDocument {
   isLatest      Boolean  @default(true)
   
   @@map("generated_documents")
+}
+
+// ============================================
+// WORKERS (Daily Labor)
+// ============================================
+
+model Worker {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id])
+  name            String
+  aadhaarNumber   String?
+  phone           String?
+  skillType       String   @default("UNSKILLED")
+  trade           String?
+  dailyWage       Decimal  @db.Decimal(10, 2)
+  bankAccount     String?
+  bankIfsc        String?
+  isActive        Boolean  @default(true)
+  joiningDate     DateTime?
+  @@map("workers")
 }

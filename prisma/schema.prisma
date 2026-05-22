@@ -421,6 +421,8 @@ model Project {
   materials            MaterialLedger[]
   
   workers              Worker[]
+  progressPhotos       ProgressPhoto[]
+  siteDiaries          SiteDiary[]
   @@map("projects")
 }
 
@@ -674,4 +676,52 @@ model Worker {
   isActive        Boolean  @default(true)
   joiningDate     DateTime?
   @@map("workers")
+}
+
+// ============================================
+// PROGRESS PHOTOS
+// ============================================
+
+model ProgressPhoto {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  photoUrl    String
+  photoPath   String
+  caption     String?
+  category    String   @default("PROGRESS")
+  workArea    String?
+  takenAt     DateTime @default(now())
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+  uploadedBy  String?
+  @@map("progress_photos")
+}
+
+// ============================================
+// SITE DIARY
+// ============================================
+
+model SiteDiary {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date            DateTime
+  weather         String?
+  temperature     String?
+  manpowerCount   Int?
+  workDescription String
+  workCompleted   String?
+  materialReceived String?
+  machineryUsed   String?
+  visitors        String?
+  issues          String?
+  instructions    String?
+  safetyNotes     String?
+  createdById     String?
+  @@unique([projectId, date])
+  @@map("site_diaries")
 }

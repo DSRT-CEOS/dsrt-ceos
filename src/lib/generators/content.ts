@@ -28,7 +28,7 @@ Return ONLY the letter text, no markdown.`;
 
   try {
     const c = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
+      model: MODELS.FAST,
       messages: [
         { role: "system", content: "You are an expert at drafting Indian government tender documents in formal English." },
         { role: "user", content: prompt }
@@ -70,7 +70,7 @@ Return ONLY the affidavit text. Use [BRACKETS] for fields to be filled manually 
 
   try {
     const c = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
+      model: MODELS.FAST,
       messages: [
         { role: "system", content: "You are an expert at drafting Indian legal affidavits for tender submissions." },
         { role: "user", content: prompt }
@@ -111,7 +111,7 @@ Return clean text, ready to print.`;
 
   try {
     const c = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
+      model: MODELS.FAST,
       messages: [
         { role: "system", content: "You are an expert at preparing tender experience statements in Indian government format." },
         { role: "user", content: prompt }

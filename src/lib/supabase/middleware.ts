@@ -24,12 +24,22 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
 
+  // Allow public access to accept-invite page
+  const isPublic = path.startsWith("/auth/accept-invite") ||
+                   path === "/" ||
+                   path === "/auth/login" ||
+                   path === "/auth/register" ||
+                   path.startsWith("/auth/callback") ||
+                   path.startsWith("/api/team/accept");
+
+  // Protect /dashboard routes
   if (!user && path.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
+  // Redirect logged-in users away from auth pages (except accept-invite + callback)
   if (user && (path === "/auth/login" || path === "/auth/register")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

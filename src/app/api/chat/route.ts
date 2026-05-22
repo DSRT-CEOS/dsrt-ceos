@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { groq, MODELS } from "@/lib/ai/groq";
+import { chatCompletion, MODELS } from "@/lib/ai/groq";
 import { executeToolCall, getToolSchema, ToolCall } from "@/lib/ai/tools";
 import prisma from "@/lib/prisma";
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const cid = dbUser.companyId;
     const c = dbUser.company;
 
-    // Quick stats for context
+    // Quick stats
     const [tenderCount, eligibleCount, activeProjects, pendingBillsAgg, urgentTendersCount] = await Promise.all([
       prisma.tender.count({ where: { uploadedById: cid, isActive: true } }),
       prisma.tenderTrack.count({ where: { companyId: cid, eligibilityStatus: "ELIGIBLE" } }),
@@ -42,54 +42,23 @@ export async function POST(request: NextRequest) {
 
     const pendingAmount = Number(pendingBillsAgg._sum.netPayable || 0);
 
-    const systemPrompt = `You are CEOS — the AI assistant that CONTROLS DSRT CEOS (Construction Enterprise OS).
-You are NOT a chatbot. You are an active assistant that can navigate, fetch data, and help users get things done.
+    const systemPrompt = `You are CEOS — the AI assistant that CONTROLS DSRT CEOS.
 
-COMPANY: ${c.name}
-- Type: ${c.type} | Class: ${c.contractorClass || "Not set"}
-- Location: ${c.city || ""}, ${c.state}
+COMPANY: ${c.name} | Type: ${c.type} | Class: ${c.contractorClass || "Not set"} | Location: ${c.city || ""}, ${c.state}
 
-CURRENT LIVE STATUS:
-- Total tenders: ${tenderCount} | Eligible: ${eligibleCount} | Urgent (7 days): ${urgentTendersCount}
-- Active projects: ${activeProjects}
+LIVE STATUS:
+- Tenders: ${tenderCount} total, ${eligibleCount} eligible, ${urgentTendersCount} urgent (7d)
+- Projects: ${activeProjects} active
 - Pending payments: Rs ${pendingAmount.toLocaleString("en-IN")} (${pendingBillsAgg._count} bills)
-- User is currently on page: ${currentPath}
+- Current page: ${currentPath}
 
-EXPERTISE:
-- Indian govt tenders (PWD, CPWD, Railway, MES, GeM, WBPWD)
-- GST 18%, IT-TDS 2%, GST-TDS 2%, Labour Cess 1%
-- ESI 3.25% + 0.75% (wage up to Rs 21,000)
-- EPF 12% + 12% (Basic+DA, EPS cap Rs 15,000)
-- RA Bills, Security Deposit, Performance Guarantee
-- Construction costing, BOQ analysis
+EXPERTISE: Indian govt tenders, GST 18%, IT-TDS 2%, ESI 3.25%+0.75%, EPF 12%+12%, RA bills
 
 ${getToolSchema()}
 
-LANGUAGE RULES:
-- Detect language: Bengali→reply Bengali (বাংলা)
-- Hindi→reply Hindi (हिंदी)
-- English→reply English
-- Match user's language exactly
+LANGUAGE: Match user input language exactly (Bengali/Hindi/English).
+STYLE: Active, concise, use tools when asked for data, navigate when asked. Use markdown.`;
 
-RESPONSE STYLE:
-- Be ACTIVE — when user asks for tenders, USE list_tenders tool, don't ask them to click
-- When user says "show me bills" or "take me to bills", USE navigate tool
-- When user asks calculations (e.g. "how much GST on 5 lakhs"), calculate directly
-- Be concise, use bullet points, show real numbers
-- After tool execution, present results clearly with markdown formatting
-- Use **bold** for emphasis, bullets for lists
-
-EXAMPLES:
-User: "আমার urgent tenders দেখাও"
-You: <tool>{"tool": "list_urgent_tenders"}</tool>
-
-User: "Take me to compliance page"
-You: <tool>{"tool": "navigate", "params": {"path": "/dashboard/compliance"}}</tool>
-
-User: "How much GST on 5 lakhs?"
-You: GST on Rs 5,00,000 at 18% = Rs 90,000. Total billable = Rs 5,90,000.`;
-
-    // Step 1: First AI call - decide if tools needed
     const messages = [
       { role: "system" as const, content: systemPrompt },
       ...history.slice(-6).map((h: any) => ({
@@ -99,16 +68,30 @@ You: GST on Rs 5,00,000 at 18% = Rs 90,000. Total billable = Rs 5,90,000.`;
       { role: "user" as const, content: message },
     ];
 
-    const firstCompletion = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
-      messages,
-      temperature: 0.3,
-      max_tokens: 1500,
-    });
+    // Try chat with fallback chain (uses 8b-instant first - 5x more quota!)
+    let firstResponse: string;
+    try {
+      firstResponse = await chatCompletion(messages, {
+        fallbackChain: [
+          "llama-3.1-8b-instant",        // try fast model first - 500K TPD
+          "llama-3.3-70b-versatile",     // fallback to balanced
+          "mixtral-8x7b-32768",          // last resort
+        ],
+        temperature: 0.3,
+        maxTokens: 1500,
+      });
+    } catch (err: any) {
+      if (err.isRateLimit) {
+        return NextResponse.json({
+          success: false,
+          error: `All AI models exhausted today. ${err.retryAfter ? `Try in ${Math.ceil(err.retryAfter / 60)} minutes.` : "Try tomorrow."} Free tier limit reached.`,
+          isRateLimit: true,
+        }, { status: 429 });
+      }
+      throw err;
+    }
 
-    let firstResponse = firstCompletion.choices[0]?.message?.content || "";
-
-    // Step 2: Check if AI used tools
+    // Check for tool calls
     const toolMatches = [...firstResponse.matchAll(/<tool>([\s\S]*?)<\/tool>/g)];
     const toolResults: any[] = [];
     let navigate: string | null = null;
@@ -125,10 +108,9 @@ You: GST on Rs 5,00,000 at 18% = Rs 90,000. Total billable = Rs 5,90,000.`;
         }
       }
 
-      // Remove tool tags from response
       let cleaned = firstResponse.replace(/<tool>[\s\S]*?<\/tool>/g, "").trim();
 
-      // Step 3: If we have tool results, get AI to synthesize a final response
+      // Synthesize final response with tool results
       if (toolResults.length > 0 && toolResults.some(r => r.data)) {
         const toolContext = toolResults.map(r => {
           if (r.navigate) return `Navigated to: ${r.navigate}`;
@@ -136,19 +118,24 @@ You: GST on Rs 5,00,000 at 18% = Rs 90,000. Total billable = Rs 5,90,000.`;
         }).join("\n\n");
 
         const synthMessages = [
-          { role: "system" as const, content: systemPrompt + "\n\nIMPORTANT: Tools have been executed. Now present results to user in their language. Be concise. Use markdown. DO NOT use any more <tool> tags." },
+          { role: "system" as const, content: systemPrompt + "\n\nTools executed. Present results concisely. NO more tool tags." },
           ...history.slice(-4).map((h: any) => ({ role: h.role as "user" | "assistant", content: h.content })),
           { role: "user" as const, content: message },
-          { role: "assistant" as const, content: cleaned || "Fetching data..." },
-          { role: "user" as const, content: `TOOL RESULTS:\n${toolContext}\n\nNow give a final answer based on this data. No more tool calls.` },
+          { role: "assistant" as const, content: cleaned || "Fetching..." },
+          { role: "user" as const, content: `RESULTS:\n${toolContext}\n\nGive final answer.` },
         ];
 
-        const synthCompletion = await groq.chat.completions.create({
-          model: MODELS.BALANCED, messages: synthMessages, temperature: 0.4, max_tokens: 1500,
-        });
-
-        firstResponse = synthCompletion.choices[0]?.message?.content || cleaned;
-        firstResponse = firstResponse.replace(/<tool>[\s\S]*?<\/tool>/g, "").trim();
+        try {
+          firstResponse = await chatCompletion(synthMessages, {
+            fallbackChain: ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+            temperature: 0.4,
+            maxTokens: 1000,
+          });
+          firstResponse = firstResponse.replace(/<tool>[\s\S]*?<\/tool>/g, "").trim();
+        } catch (err: any) {
+          // If synthesis fails, return cleaned + raw data
+          firstResponse = cleaned || "Here is the data you requested.";
+        }
       } else {
         firstResponse = cleaned;
       }
@@ -162,6 +149,17 @@ You: GST on Rs 5,00,000 at 18% = Rs 90,000. Total billable = Rs 5,90,000.`;
     });
   } catch (err: any) {
     console.error("Chat err:", err);
-    return NextResponse.json({ success: false, error: err.message || "Chat failed" }, { status: 500 });
+    if (err.isRateLimit) {
+      return NextResponse.json({
+        success: false,
+        error: err.message,
+        isRateLimit: true,
+        retryAfter: err.retryAfter,
+      }, { status: 429 });
+    }
+    return NextResponse.json({
+      success: false,
+      error: err.message || "Chat failed"
+    }, { status: 500 });
   }
 }

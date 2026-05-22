@@ -95,7 +95,7 @@ ${truncated}`;
 
   try {
     const c = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
+      model: MODELS.FAST,
       messages: [
         { role: "system", content: "You are an expert at parsing Indian government tender documents. Return only valid JSON." },
         { role: "user", content: prompt }
@@ -114,13 +114,13 @@ ${truncated}`;
 export async function generateTenderSummary(text: string, lang: "en" | "bn" | "hi"): Promise<string> {
   const langMap = {
     en: "English",
-    bn: "Bengali (বাংলা)",
-    hi: "Hindi (हिंदी)"
+    bn: "Bengali (à¦¬à¦¾à¦‚à¦²à¦¾)",
+    hi: "Hindi (à¤¹à¤¿à¤‚à¤¦à¥€)"
   };
 
   try {
     const c = await groq.chat.completions.create({
-      model: MODELS.BALANCED,
+      model: MODELS.FAST,
       messages: [
         { role: "system", content: `Summarize Indian tender documents concisely in ${langMap[lang]}. Use bullet points. Be specific with numbers and dates.` },
         { role: "user", content: `Create a 6-8 bullet summary in ${langMap[lang]} of this tender:\n\n${text.substring(0, 8000)}\n\nInclude: work name, department, estimated cost, EMD, deadline, key eligibility, completion period, important conditions.` }
@@ -163,9 +163,9 @@ export async function calculateEligibility(tender: any, company: any) {
     const tCost = Number(tender.estimatedCost);
     const cLimit = Number(company.financialLimit);
     if (tCost <= cLimit) {
-      checks.push({ criterion: "Financial Capacity", status: "PASS", note: `Within your limit of ₹${(cLimit / 100000).toFixed(1)}L` });
+      checks.push({ criterion: "Financial Capacity", status: "PASS", note: `Within your limit of â‚¹${(cLimit / 100000).toFixed(1)}L` });
     } else {
-      checks.push({ criterion: "Financial Capacity", status: "FAIL", note: `Exceeds your limit ₹${(cLimit / 100000).toFixed(1)}L vs ₹${(tCost / 100000).toFixed(1)}L` });
+      checks.push({ criterion: "Financial Capacity", status: "FAIL", note: `Exceeds your limit â‚¹${(cLimit / 100000).toFixed(1)}L vs â‚¹${(tCost / 100000).toFixed(1)}L` });
     }
   }
 

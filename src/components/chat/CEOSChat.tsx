@@ -19,20 +19,20 @@ interface Msg {
   timestamp?: number;
 }
 
-const WELCOME = `নমস্কার! আমি **CEOS** — আপনার Construction Operating System AI।
+const WELCOME = `Ã Â¦Â¨Ã Â¦Â®Ã Â¦Â¸Ã Â§ÂÃ Â¦â€¢Ã Â¦Â¾Ã Â¦Â°! Ã Â¦â€ Ã Â¦Â®Ã Â¦Â¿ **CEOS** Ã¢â‚¬â€ Ã Â¦â€ Ã Â¦ÂªÃ Â¦Â¨Ã Â¦Â¾Ã Â¦Â° Construction Operating System AIÃ Â¥Â¤
 
-আমি শুধু চ্যাটবট নই — আমি পুরো system control করতে পারি:
-- 📊 **Live data** দেখাতে পারি (tenders, bills, projects)
-- 🧭 **Navigate** করতে পারি যেকোনো page-এ
-- 💰 **Calculate** করতে পারি GST, TDS, ESI, EPF
-- 📋 **Analyze** করতে পারি tender eligibility
-- 🇧🇩 **বাংলা**, 🇮🇳 **हिंदी**, 🇬🇧 **English** — সব ভাষায়
+Ã Â¦â€ Ã Â¦Â®Ã Â¦Â¿ Ã Â¦Â¶Ã Â§ÂÃ Â¦Â§Ã Â§Â Ã Â¦Å¡Ã Â§ÂÃ Â¦Â¯Ã Â¦Â¾Ã Â¦Å¸Ã Â¦Â¬Ã Â¦Å¸ Ã Â¦Â¨Ã Â¦â€¡ Ã¢â‚¬â€ Ã Â¦â€ Ã Â¦Â®Ã Â¦Â¿ Ã Â¦ÂªÃ Â§ÂÃ Â¦Â°Ã Â§â€¹ system control Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â¦Â¿:
+- Ã°Å¸â€œÅ  **Live data** Ã Â¦Â¦Ã Â§â€¡Ã Â¦â€“Ã Â¦Â¾Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â¦Â¿ (tenders, bills, projects)
+- Ã°Å¸Â§Â­ **Navigate** Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â¦Â¿ Ã Â¦Â¯Ã Â§â€¡Ã Â¦â€¢Ã Â§â€¹Ã Â¦Â¨Ã Â§â€¹ page-Ã Â¦Â
+- Ã°Å¸â€™Â° **Calculate** Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â¦Â¿ GST, TDS, ESI, EPF
+- Ã°Å¸â€œâ€¹ **Analyze** Ã Â¦â€¢Ã Â¦Â°Ã Â¦Â¤Ã Â§â€¡ Ã Â¦ÂªÃ Â¦Â¾Ã Â¦Â°Ã Â¦Â¿ tender eligibility
+- Ã°Å¸â€¡Â§Ã°Å¸â€¡Â© **Ã Â¦Â¬Ã Â¦Â¾Ã Â¦â€šÃ Â¦Â²Ã Â¦Â¾**, Ã°Å¸â€¡Â®Ã°Å¸â€¡Â³ **Ã Â¤Â¹Ã Â¤Â¿Ã Â¤â€šÃ Â¤Â¦Ã Â¥â‚¬**, Ã°Å¸â€¡Â¬Ã°Å¸â€¡Â§ **English** Ã¢â‚¬â€ Ã Â¦Â¸Ã Â¦Â¬ Ã Â¦Â­Ã Â¦Â¾Ã Â¦Â·Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼
 
-কী জানতে চান?`;
+Ã Â¦â€¢Ã Â§â‚¬ Ã Â¦Å“Ã Â¦Â¾Ã Â¦Â¨Ã Â¦Â¤Ã Â§â€¡ Ã Â¦Å¡Ã Â¦Â¾Ã Â¦Â¨?`;
 
 const QUICK_PROMPTS = [
   { icon: AlertCircle, text: "Show urgent tenders", color: "red" },
-  { icon: FileText, text: "Eligible tenders দেখাও", color: "green" },
+  { icon: FileText, text: "Eligible tenders Ã Â¦Â¦Ã Â§â€¡Ã Â¦â€“Ã Â¦Â¾Ã Â¦â€œ", color: "green" },
   { icon: Receipt, text: "Pending bills", color: "orange" },
   { icon: Building2, text: "Compliance summary", color: "blue" },
 ];
@@ -111,7 +111,11 @@ export default function CEOSChat() {
 
       setMsgs(p => p.map(m => m.loading ? {
         ...m,
-        content: data.success ? (data.response || "Done.") : `Error: ${data.error || "Failed"}`,
+        content: data.success 
+          ? (data.response || "Done.") 
+          : data.isRateLimit
+            ? `â° **AI Quota Reached**\n\n${data.error}\n\nFree tier limits reset every 24 hours. The system is still fully functional â€” only AI chat is temporarily limited.`
+            : `Error: ${data.error || "Failed"}`,
         loading: false,
         toolResults: data.toolResults,
         navigate: data.navigate,
@@ -188,7 +192,7 @@ export default function CEOSChat() {
             </div>
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-green-400 text-xs">Active · Can control system</span>
+              <span className="text-green-400 text-xs">Active Ã‚Â· Can control system</span>
             </div>
           </div>
         </div>
@@ -287,7 +291,7 @@ export default function CEOSChat() {
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
             }}
-            placeholder="বাংলায় লিখুন বা type in English / Hindi..."
+            placeholder="Ã Â¦Â¬Ã Â¦Â¾Ã Â¦â€šÃ Â¦Â²Ã Â¦Â¾Ã Â¦Â¯Ã Â¦Â¼ Ã Â¦Â²Ã Â¦Â¿Ã Â¦â€“Ã Â§ÂÃ Â¦Â¨ Ã Â¦Â¬Ã Â¦Â¾ type in English / Hindi..."
             rows={1}
             className="flex-1 bg-transparent text-white text-sm placeholder:text-slate-500 resize-none outline-none max-h-32 leading-relaxed py-1.5"
             disabled={busy}

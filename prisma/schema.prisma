@@ -58,6 +58,7 @@ model Company {
   uploadedTenders   Tender[] @relation("UploadedBy")
   
   workers           Worker[]
+  invites           TeamInvite[]
   @@map("companies")
 }
 
@@ -724,4 +725,25 @@ model SiteDiary {
   createdById     String?
   @@unique([projectId, date])
   @@map("site_diaries")
+}
+
+// ============================================
+// TEAM INVITES
+// ============================================
+
+model TeamInvite {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  email       String
+  name        String?
+  role        String   @default("VIEWER")
+  inviteToken String   @unique @default(cuid())
+  invitedById String?
+  status      String   @default("PENDING")
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  @@unique([companyId, email])
+  @@map("team_invites")
 }

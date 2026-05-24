@@ -5,6 +5,11 @@ import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 export const metadata: Metadata = {
   title: "DSRT CEOS - Construction Enterprise Operating System",
   description: "AI-powered tender management for Indian construction enterprises",

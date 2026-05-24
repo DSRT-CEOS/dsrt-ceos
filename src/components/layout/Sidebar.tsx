@@ -1,55 +1,55 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarChart3, Settings, Bot } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarChart3, Settings, Bot, Menu, X, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/hooks/useUser";
-import { hasPermission, type Role } from "@/lib/auth/roles";
+import { hasPermission } from "@/lib/auth/roles";
 
 interface NavItem {
-  name: string;
-  href: string;
-  icon: any;
-  label: string;
-  module?: string;
-  action?: string;
+  name: string; href: string; icon: any; module?: string; action?: string;
 }
 
 const allNav: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
-  { name: "Tenders", href: "/dashboard/tenders", icon: Search, label: "Upload & analyze", module: "tenders", action: "view" },
-  { name: "Documents", href: "/dashboard/documents", icon: FolderOpen, label: "Company vault", module: "documents", action: "view" },
-  { name: "Projects", href: "/dashboard/projects", icon: Building2, label: "Active projects", module: "projects", action: "view" },
-  { name: "Billing", href: "/dashboard/billing", icon: Receipt, label: "RA Bills", module: "bills", action: "view" },
-  { name: "Compliance", href: "/dashboard/compliance", icon: Shield, label: "ESI EPF GST", module: "compliance", action: "view" },
-  { name: "Reports", href: "/dashboard/reports", icon: BarChart3, label: "Analytics", module: "reports", action: "view" },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings, label: "Profile and prefs", module: "settings", action: "view" },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Calendar", href: "/dashboard/calendar", icon: Calendar },
+  { name: "Tenders", href: "/dashboard/tenders", icon: Search, module: "tenders", action: "view" },
+  { name: "Documents", href: "/dashboard/documents", icon: FolderOpen, module: "documents", action: "view" },
+  { name: "Projects", href: "/dashboard/projects", icon: Building2, module: "projects", action: "view" },
+  { name: "Billing", href: "/dashboard/billing", icon: Receipt, module: "bills", action: "view" },
+  { name: "Compliance", href: "/dashboard/compliance", icon: Shield, module: "compliance", action: "view" },
+  { name: "Reports", href: "/dashboard/reports", icon: BarChart3, module: "reports", action: "view" },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings, module: "settings", action: "view" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { role, loading } = useCurrentUser();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Filter nav based on permissions
-  const visibleNav = loading
-    ? allNav
-    : allNav.filter(item => {
-        if (!item.module || !item.action) return true;
-        return hasPermission(role, item.module as any, item.action);
-      });
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  return (
-    <div className="w-56 bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0">
-      <div className="p-4 border-b border-slate-800">
+  const visibleNav = loading ? allNav : allNav.filter(item => {
+    if (!item.module || !item.action) return true;
+    return hasPermission(role, item.module as any, item.action);
+  });
+
+  const SidebarContent = () => (
+    <>
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
-            <Building2 className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-md flex items-center justify-center shadow-sm">
+            <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="text-white font-bold text-sm leading-tight">DSRT CEOS</h1>
-            <p className="text-slate-600 text-xs">Construction OS</p>
+            <h1 className="text-foreground font-bold text-sm leading-tight tracking-tight">DSRT CEOS</h1>
+            <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Construction OS</p>
           </div>
         </Link>
+        <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
@@ -58,29 +58,52 @@ export default function Sidebar() {
           return (
             <Link key={item.href} href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm group",
-                active ? "bg-orange-500/10 border border-orange-500/20 text-orange-300" : "text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent"
+                "flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm relative",
+                active
+                  ? "bg-orange-500/10 text-orange-300 font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               )}>
-              <item.icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-orange-400" : "text-slate-500 group-hover:text-slate-300")} />
-              <div className="min-w-0">
-                <p className="font-medium truncate leading-tight">{item.name}</p>
-                <p className="text-xs text-slate-600 truncate">{item.label}</p>
-              </div>
+              {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-orange-500 rounded-r" />}
+              <item.icon className={cn("w-4 h-4 flex-shrink-0",
+                active ? "text-orange-400" : "text-muted-foreground")} strokeWidth={active ? 2.25 : 2} />
+              <span className="font-medium">{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-3 border-t border-slate-800">
-        <div className="bg-orange-500/5 border border-orange-500/10 rounded-lg p-3">
+      <div className="p-3 border-t border-border">
+        <div className="bg-secondary/50 border border-border rounded-md p-2.5">
           <div className="flex items-center gap-2 mb-1">
             <Bot className="w-3.5 h-3.5 text-orange-400" />
-            <span className="text-white text-xs font-medium">CEOS AI</span>
+            <span className="text-foreground text-xs font-semibold">CEOS Assistant</span>
             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse ml-auto" />
           </div>
-          <p className="text-slate-600 text-xs">Bengali · Hindi · English</p>
+          <p className="text-muted-foreground text-[11px]">Multilingual AI · Always on</p>
         </div>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      <button onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-3 left-3 z-30 w-9 h-9 bg-card border border-border rounded-md flex items-center justify-center text-foreground shadow-md">
+        <Menu className="w-4 h-4" />
+      </button>
+
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
+      )}
+
+      <div className={cn(
+        "bg-card border-r border-border flex flex-col flex-shrink-0 transition-transform duration-300 z-50",
+        "md:relative md:translate-x-0 md:w-56",
+        "fixed top-0 left-0 bottom-0 w-64",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
+        <SidebarContent />
+      </div>
+    </>
   );
 }

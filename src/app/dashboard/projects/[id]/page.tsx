@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Building2, IndianRupee, FileText, Loader2, Plus, Trash2,
-  Receipt, Users, Package, ClipboardCheck, Wallet, ListChecks, Camera, BookOpen
+  Receipt, Users, Package, ClipboardCheck, Wallet, ListChecks, Camera, BookOpen, BarChart3
 } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function ProjectDetail() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ export default function ProjectDetail() {
   const profit = project.totalReceived - Number(project.totalExpenses || 0);
 
   return (
-    <div className="space-y-5 max-w-6xl">
+    <div className="space-y-5 max-w-7xl">
       <Link href="/dashboard/projects"><Button variant="ghost" size="sm" className="-ml-2"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -94,26 +95,33 @@ export default function ProjectDetail() {
 
       <div>
         <h3 className="text-slate-400 text-xs uppercase tracking-wide mb-2">Project Management</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Link href={`/dashboard/projects/${id}/boq`}>
             <Card className="hover:border-purple-500/30 hover:bg-purple-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
               <ListChecks className="w-6 h-6 text-purple-400 mx-auto mb-2" />
               <p className="text-white font-medium text-sm">BOQ</p>
-              <p className="text-slate-500 text-xs">Quantities & progress</p>
+              <p className="text-slate-500 text-xs">Quantities</p>
+            </CardContent></Card>
+          </Link>
+          <Link href={`/dashboard/projects/${id}/gantt`}>
+            <Card className="hover:border-indigo-500/30 hover:bg-indigo-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+              <BarChart3 className="w-6 h-6 text-indigo-400 mx-auto mb-2" />
+              <p className="text-white font-medium text-sm">Gantt</p>
+              <p className="text-slate-500 text-xs">Timeline</p>
             </CardContent></Card>
           </Link>
           <Link href={`/dashboard/projects/${id}/diary`}>
             <Card className="hover:border-blue-500/30 hover:bg-blue-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
               <BookOpen className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-              <p className="text-white font-medium text-sm">Site Diary</p>
-              <p className="text-slate-500 text-xs">Daily records</p>
+              <p className="text-white font-medium text-sm">Diary</p>
+              <p className="text-slate-500 text-xs">Daily logs</p>
             </CardContent></Card>
           </Link>
           <Link href={`/dashboard/projects/${id}/photos`}>
             <Card className="hover:border-pink-500/30 hover:bg-pink-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
               <Camera className="w-6 h-6 text-pink-400 mx-auto mb-2" />
               <p className="text-white font-medium text-sm">Photos</p>
-              <p className="text-slate-500 text-xs">Progress evidence</p>
+              <p className="text-slate-500 text-xs">Evidence</p>
             </CardContent></Card>
           </Link>
           <Link href={`/dashboard/billing?projectId=${id}`}>
@@ -128,7 +136,7 @@ export default function ProjectDetail() {
 
       <div>
         <h3 className="text-slate-400 text-xs uppercase tracking-wide mb-2">Workforce & Resources</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Link href={`/dashboard/projects/${id}/workers`}>
             <Card className="hover:border-orange-500/30 hover:bg-orange-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
               <Users className="w-6 h-6 text-orange-400 mx-auto mb-2" />
@@ -153,17 +161,14 @@ export default function ProjectDetail() {
               <p className="text-white font-medium text-sm">Materials</p>
             </CardContent></Card>
           </Link>
+          <Link href={`/dashboard/projects/${id}/expenses`}>
+            <Card className="hover:border-red-500/30 hover:bg-red-500/5 cursor-pointer transition-all"><CardContent className="p-4 text-center">
+              <IndianRupee className="w-6 h-6 text-red-400 mx-auto mb-2" />
+              <p className="text-white font-medium text-sm">Expenses</p>
+            </CardContent></Card>
+          </Link>
         </div>
       </div>
-
-      <Card>
-        <CardContent className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><IndianRupee className="w-4 h-4 text-red-400" />Expenses</h3>
-          <Link href={`/dashboard/projects/${id}/expenses`}>
-            <Button variant="outline" className="w-full">View all expenses</Button>
-          </Link>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="p-5">

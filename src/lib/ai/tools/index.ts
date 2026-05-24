@@ -28,12 +28,7 @@ export async function executeToolCall(call: ToolCall, companyId: string): Promis
           where: { uploadedById: companyId, isActive: true },
           orderBy: { createdAt: "desc" },
           take: 10,
-          include: { tracks: { where: { companyId }, take: 1 } },
-          select: {
-            id: true, workName: true, department: true,
-            estimatedCost: true, lastSubmissionDate: true,
-            tracks: { select: { status: true, eligibilityStatus: true, matchScore: true } }
-          }
+          include: { tracks: { where: { companyId }, take: 1 } }
         });
         return {
           tool: call.tool, success: true,
@@ -64,7 +59,7 @@ export async function executeToolCall(call: ToolCall, companyId: string): Promis
             id: t.id, workName: t.workName, department: t.department,
             estimatedCost: t.estimatedCost ? Number(t.estimatedCost) : null,
             deadline: t.lastSubmissionDate,
-            daysLeft: Math.ceil((new Date(t.lastSubmissionDate!).getTime() - Date.now()) / 86400000),
+            daysLeft: t.lastSubmissionDate ? Math.ceil((new Date(t.lastSubmissionDate).getTime() - Date.now()) / 86400000) : 0,
             url: `/dashboard/tenders/${t.id}`,
           })),
         };
@@ -213,47 +208,29 @@ export async function executeToolCall(call: ToolCall, companyId: string): Promis
   }
 }
 
-// AI determines which tools to use based on user query
 export function getToolSchema(): string {
-  return `Available tools you can use to help the user:
+  return `AVAILABLE TOOLS (use these for real data):
 
 1. list_tenders - Show user's uploaded tenders
-2. list_urgent_tenders - Show tenders closing in 7 days
-3. list_eligible_tenders - Show tenders where user is eligible
-4. list_projects - Show user's projects
-5. list_bills - Show all bills
-6. list_pending_bills - Show bills awaiting payment
-7. list_documents - Show company documents
-8. get_compliance_summary - Get GST/TDS/ESI/EPF summary
-9. get_financial_summary - Get overall financial picture
-10. navigate(path) - Navigate user to a specific page
+2. list_urgent_tenders - Tenders closing in 7 days
+3. list_eligible_tenders - Tenders user is eligible for
+4. list_projects - User's projects
+5. list_bills - All bills
+6. list_pending_bills - Bills awaiting payment
+7. list_documents - Company documents
+8. get_compliance_summary - GST/TDS/ESI/EPF summary
+9. get_financial_summary - Financial overview
+10. navigate(path) - Navigate to a page
 
 NAVIGATION PATHS:
-- /dashboard - Home
-- /dashboard/tenders - Tender list
-- /dashboard/tenders/upload - Tender upload (no separate page - use tenders page)
-- /dashboard/documents - Document vault
-- /dashboard/projects - All projects
-- /dashboard/projects/new - Create new project
-- /dashboard/billing - All bills
-- /dashboard/billing/new - Create new bill
-- /dashboard/compliance - Compliance dashboard
-- /dashboard/reports - Reports & analytics
-- /dashboard/settings/profile - Company profile
-- /dashboard/settings/preferences - Preferences
-- /dashboard/settings/staff - Staff management
-- /dashboard/settings/machinery - Machinery
-- /dashboard/settings/past-works - Past works
-- /dashboard/settings/registrations - Registrations
-
-When user asks about data, USE the appropriate tool.
-When user asks to "go to" or "show me" a section, USE navigate tool.
-When user just asks for info/explanation, answer directly without tools.
+- /dashboard, /dashboard/calendar
+- /dashboard/tenders, /dashboard/documents
+- /dashboard/projects, /dashboard/projects/new
+- /dashboard/billing, /dashboard/billing/new
+- /dashboard/compliance, /dashboard/reports
+- /dashboard/settings/{profile|preferences|staff|machinery|past-works|registrations|team}
 
 To use a tool, respond with JSON wrapped in <tool> tags:
 <tool>{"tool": "list_urgent_tenders"}</tool>
-<tool>{"tool": "navigate", "params": {"path": "/dashboard/tenders"}}</tool>
-
-You can use MULTIPLE tools in one response if needed.
-After tool call, you'll see results and can give final answer.`;
+<tool>{"tool": "navigate", "params": {"path": "/dashboard/tenders"}}</tool>`;
 }

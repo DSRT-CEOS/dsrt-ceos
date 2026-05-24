@@ -1,57 +1,90 @@
 import Link from "next/link";
-import { Building2, Search, FileText, Receipt, Shield, Bot } from "lucide-react";
+import { Search, FileText, Receipt, Shield, Bot, ArrowRight, CheckCircle2 } from "lucide-react";
+import Logo from "@/components/shared/Logo";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-      <div className="text-center max-w-2xl">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-500 rounded-2xl mb-6 shadow-2xl shadow-orange-500/30">
-          <Building2 className="w-10 h-10 text-white" />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Logo size="md" />
+          <div className="flex gap-2">
+            <Link href="/auth/login"><Button variant="ghost" size="sm">Sign In</Button></Link>
+            <Link href="/auth/register"><Button size="sm">Get Started</Button></Link>
+          </div>
         </div>
-        <h1 className="text-5xl font-bold text-white mb-3">DSRT CEOS</h1>
-        <p className="text-slate-300 text-lg mb-2">Construction Enterprise Operating System</p>
-        <p className="text-slate-500 text-sm mb-10 max-w-md mx-auto">
-          AI-powered tender management for Indian contractors. Upload tender PDFs, generate documents, track compliance — all in one place.
-        </p>
+      </header>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-          {[
-            { icon: Search, label: "Tender AI", desc: "PDF Analysis" },
-            { icon: FileText, label: "Documents", desc: "Auto Generation" },
-            { icon: Receipt, label: "RA Billing", desc: "All Deductions" },
-            { icon: Shield, label: "Compliance", desc: "ESI EPF GST" },
-          ].map((item) => (
-            <div key={item.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-orange-500/30 transition-colors">
-              <item.icon className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-              <p className="text-white text-sm font-semibold">{item.label}</p>
-              <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
+      {/* Hero */}
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="max-w-4xl text-center">
+          <div className="inline-flex items-center justify-center mb-8">
+            <Logo size="xl" showText={false} />
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
+            Construction Enterprise<br />Operating System
+          </h1>
+          <p className="text-muted-foreground text-lg mb-2 max-w-2xl mx-auto">
+            AI-powered tender management, billing, and compliance for Indian construction enterprises.
+          </p>
+          <p className="text-muted-foreground text-sm mb-10">
+            From tender upload to final bill — all in one platform.
+          </p>
+
+          {/* Feature grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
+            {[
+              { icon: Search, label: "Tender AI", desc: "PDF analysis" },
+              { icon: FileText, label: "Documents", desc: "Auto generation" },
+              { icon: Receipt, label: "RA Billing", desc: "All deductions" },
+              { icon: Shield, label: "Compliance", desc: "ESI EPF GST" },
+            ].map((item) => (
+              <div key={item.label} className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors">
+                <item.icon className="w-6 h-6 text-primary mx-auto mb-2" />
+                <p className="text-foreground text-sm font-semibold">{item.label}</p>
+                <p className="text-muted-foreground text-xs mt-0.5">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+            <Link href="/auth/register">
+              <Button size="lg" className="w-full sm:w-auto">
+                Get Started Free <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto">Sign In</Button>
+            </Link>
+          </div>
+
+          {/* Trust signals */}
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              <span>No credit card required</span>
             </div>
-          ))}
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              <span>Free forever plan</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Bot className="w-3.5 h-3.5 text-primary" />
+              <span>AI speaks Bengali, Hindi, English</span>
+            </div>
+          </div>
         </div>
+      </main>
 
-        <div className="flex gap-3 justify-center mb-10">
-          <Link href="/auth/register">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
-              Get Started Free
-            </button>
-          </Link>
-          <Link href="/auth/login">
-            <button className="border border-slate-700 text-slate-300 hover:bg-slate-800 px-8 py-3 rounded-lg transition-colors">
-              Sign In
-            </button>
-          </Link>
+      <footer className="border-t border-border py-4">
+        <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground">
+          DSRT CEOS · Built for Indian Construction · v1.0
         </div>
-
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-4">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-green-400 text-sm font-medium">System Online</span>
-        </div>
-
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <Bot className="w-4 h-4 text-orange-400" />
-          <p className="text-slate-600 text-xs">CEOS AI speaks Bengali • हिंदी • English</p>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }

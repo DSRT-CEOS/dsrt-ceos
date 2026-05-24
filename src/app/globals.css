@@ -4,27 +4,29 @@
 
 @layer base {
   :root {
-    /* Classic professional dark theme */
-    --background: 222 47% 5%;
-    --foreground: 210 40% 96%;
-    --card: 222 39% 8%;
-    --card-foreground: 210 40% 96%;
-    --popover: 222 39% 8%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 24 95% 53%;
+    /* Pure black + white + blue theme */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 226 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 222 30% 14%;
-    --muted-foreground: 215 16% 56%;
-    --accent: 222 30% 14%;
-    --accent-foreground: 210 40% 96%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 96%;
-    --border: 222 25% 16%;
-    --input: 222 30% 14%;
-    --ring: 24 95% 53%;
-    --radius: 0.5rem;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+    --border: 0 0% 14%;
+    --input: 0 0% 8%;
+    --ring: 226 100% 50%;
+    --radius: 0.375rem;
   }
 }
 
@@ -39,11 +41,11 @@
   }
 }
 
-/* Professional scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: hsl(222 39% 6%); }
-::-webkit-scrollbar-thumb { background: hsl(222 25% 18%); border-radius: 5px; border: 2px solid hsl(222 39% 6%); }
-::-webkit-scrollbar-thumb:hover { background: hsl(222 25% 24%); }
+/* Professional thin scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: hsl(0 0% 2%); }
+::-webkit-scrollbar-thumb { background: hsl(0 0% 18%); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 25%); }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -52,53 +54,37 @@
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 
-/* Markdown chat styles */
+/* Markdown chat */
 .prose ul { list-style-type: disc; padding-left: 1.25rem; }
 .prose ol { list-style-type: decimal; padding-left: 1.25rem; }
 .prose li { margin: 0.125rem 0; }
-.prose h1, .prose h2, .prose h3 { font-weight: 700; margin: 0.5rem 0 0.25rem; color: white; }
-.prose h1 { font-size: 1.1rem; }
+.prose h1, .prose h2, .prose h3 { font-weight: 600; margin: 0.5rem 0 0.25rem; color: white; letter-spacing: -0.02em; }
+.prose h1 { font-size: 1.05rem; }
 .prose h2 { font-size: 1rem; }
 .prose h3 { font-size: 0.95rem; }
-.prose a { color: #fb923c; text-decoration: underline; }
-.prose blockquote { border-left: 3px solid #fb923c; padding-left: 0.75rem; margin: 0.5rem 0; color: #cbd5e1; }
+.prose a { color: hsl(226 100% 65%); text-decoration: underline; }
+.prose blockquote { border-left: 3px solid hsl(226 100% 50%); padding-left: 0.75rem; margin: 0.5rem 0; color: hsl(0 0% 80%); }
 .prose hr { border-color: hsl(var(--border)); margin: 0.5rem 0; }
 .prose table { border-collapse: collapse; margin: 0.5rem 0; width: 100%; }
 .prose th, .prose td { border: 1px solid hsl(var(--border)); padding: 0.375rem 0.625rem; font-size: 0.825rem; }
 .prose th { background: hsl(var(--secondary)); font-weight: 600; }
+.prose code { background: hsl(0 0% 12%); padding: 0.125rem 0.375rem; border-radius: 3px; color: hsl(226 100% 70%); font-size: 0.85em; }
 
-/* Professional card styling */
-.card-elevated {
-  background: linear-gradient(180deg, hsl(222 39% 9%) 0%, hsl(222 39% 7%) 100%);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-}
-
-/* Subtle elevation on hover */
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
-
-/* Mobile optimizations */
 @media (max-width: 768px) {
   .prose { font-size: 0.8125rem; }
-  .prose h1 { font-size: 1rem; }
-  .prose h2 { font-size: 0.95rem; }
-  .prose h3 { font-size: 0.9rem; }
   table { font-size: 0.75rem; }
 }
 
-/* Touch-friendly tap targets */
 button, a { -webkit-tap-highlight-color: transparent; }
 
-/* Smooth focus rings */
 :focus-visible {
   outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
-/* Professional typography */
 h1, h2, h3, h4 { letter-spacing: -0.02em; }
+
+/* Logo brand mark */
+.brand-mark {
+  background: linear-gradient(135deg, hsl(226 100% 50%) 0%, hsl(226 100% 40%) 100%);
+}

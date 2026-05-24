@@ -6,6 +6,7 @@ import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarCha
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/hooks/useUser";
 import { hasPermission } from "@/lib/auth/roles";
+import Logo from "@/components/shared/Logo";
 
 interface NavItem {
   name: string; href: string; icon: any; module?: string; action?: string;
@@ -38,14 +39,8 @@ export default function Sidebar() {
   const SidebarContent = () => (
     <>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-md flex items-center justify-center shadow-sm">
-            <Building2 className="w-4 h-4 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <h1 className="text-foreground font-bold text-sm leading-tight tracking-tight">DSRT CEOS</h1>
-            <p className="text-muted-foreground text-[10px] uppercase tracking-wider">Construction OS</p>
-          </div>
+        <Link href="/dashboard">
+          <Logo size="md" />
         </Link>
         <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
           <X className="w-5 h-5" />
@@ -58,14 +53,14 @@ export default function Sidebar() {
           return (
             <Link key={item.href} href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm relative",
+                "flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm relative group",
                 active
-                  ? "bg-orange-500/10 text-orange-300 font-medium"
+                  ? "bg-primary/10 text-white font-medium"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               )}>
-              {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-orange-500 rounded-r" />}
-              <item.icon className={cn("w-4 h-4 flex-shrink-0",
-                active ? "text-orange-400" : "text-muted-foreground")} strokeWidth={active ? 2.25 : 2} />
+              {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r" />}
+              <item.icon className={cn("w-4 h-4 flex-shrink-0 transition-colors",
+                active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} strokeWidth={active ? 2.25 : 2} />
               <span className="font-medium">{item.name}</span>
             </Link>
           );
@@ -73,13 +68,13 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-3 border-t border-border">
-        <div className="bg-secondary/50 border border-border rounded-md p-2.5">
+        <div className="bg-secondary/30 border border-border rounded-md p-2.5">
           <div className="flex items-center gap-2 mb-1">
-            <Bot className="w-3.5 h-3.5 text-orange-400" />
+            <Bot className="w-3.5 h-3.5 text-primary" />
             <span className="text-foreground text-xs font-semibold">CEOS Assistant</span>
-            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse ml-auto" />
+            <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse ml-auto" />
           </div>
-          <p className="text-muted-foreground text-[11px]">Multilingual AI · Always on</p>
+          <p className="text-muted-foreground text-[11px]">AI · বাংলা · हिंदी · English</p>
         </div>
       </div>
     </>
@@ -93,7 +88,7 @@ export default function Sidebar() {
       </button>
 
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
+        <div className="md:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
       )}
 
       <div className={cn(

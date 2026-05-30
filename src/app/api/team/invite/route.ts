@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
       body: `
         <p>Hi ${name || "there"},</p>
         <p><strong>${dbUser.name}</strong> has invited you to join <strong>${dbUser.company.name}</strong> on DSRT CEOS as <strong>${role}</strong>.</p>
-        <p>DSRT CEOS is a Construction Enterprise Operating System that helps manage tenders, projects, bills, and compliance — all in one place.</p>
+        <p>DSRT CEOS is a Construction Enterprise Operating System that helps manage tenders, projects, bills, and compliance â€” all in one place.</p>
         <div style="margin:20px 0;padding:16px;background:#0f172a;border:1px solid #f97316;border-radius:8px;">
           <p style="margin:0;color:#fb923c;font-size:13px;font-weight:600;">Your Role: ${role}</p>
           <p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">Click the button below to accept and create your account.</p>

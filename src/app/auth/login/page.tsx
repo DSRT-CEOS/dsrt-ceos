@@ -51,7 +51,7 @@ function LoginContent() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex justify-center mb-8">
-          <Logo size="lg" />
+          <Logo size="md" />
         </Link>
 
         {errorMsg && (
@@ -75,7 +75,7 @@ function LoginContent() {
               </div>
               <div className="space-y-2">
                 <Label>Password</Label>
-                <Input type="password" placeholder="••••••••" value={password}
+                <Input type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password}
                   onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>

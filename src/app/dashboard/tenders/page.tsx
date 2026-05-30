@@ -1,3 +1,4 @@
+import Link from "next/link";
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TenderUploader from "@/components/tenders/TenderUploader";
 import TenderCard from "@/components/tenders/TenderCard";
-import { Search, Upload, Loader2, X, FileText, Sparkles } from "lucide-react";
+import { Search, Upload, Loader2, X, FileText, Sparkles, GitCompare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_FILTERS = [

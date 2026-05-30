@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarChart3, Settings, Bot, Menu, X, Calendar } from "lucide-react";
+import { LayoutDashboard, Search, FolderOpen, Building2, Receipt, Shield, BarChart3, Settings, Bot, Menu, X, Calendar, HardHat, GitCompare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/hooks/useUser";
 import { hasPermission } from "@/lib/auth/roles";
@@ -18,6 +18,7 @@ const allNav: NavItem[] = [
   { name: "Tenders", href: "/dashboard/tenders", icon: Search, module: "tenders", action: "view" },
   { name: "Documents", href: "/dashboard/documents", icon: FolderOpen, module: "documents", action: "view" },
   { name: "Projects", href: "/dashboard/projects", icon: Building2, module: "projects", action: "view" },
+  { name: "Sub-contractors", href: "/dashboard/subcontractors", icon: HardHat, module: "projects", action: "view" },
   { name: "Billing", href: "/dashboard/billing", icon: Receipt, module: "bills", action: "view" },
   { name: "Compliance", href: "/dashboard/compliance", icon: Shield, module: "compliance", action: "view" },
   { name: "Reports", href: "/dashboard/reports", icon: BarChart3, module: "reports", action: "view" },
@@ -39,9 +40,7 @@ export default function Sidebar() {
   const SidebarContent = () => (
     <>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <Link href="/dashboard">
-          <Logo size="md" />
-        </Link>
+        <Link href="/dashboard"><Logo size="sm" /></Link>
         <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
           <X className="w-5 h-5" />
         </button>
@@ -54,9 +53,7 @@ export default function Sidebar() {
             <Link key={item.href} href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm relative group",
-                active
-                  ? "bg-primary/10 text-white font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                active ? "bg-primary/10 text-white font-medium" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               )}>
               {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r" />}
               <item.icon className={cn("w-4 h-4 flex-shrink-0 transition-colors",
@@ -93,7 +90,7 @@ export default function Sidebar() {
 
       <div className={cn(
         "bg-card border-r border-border flex flex-col flex-shrink-0 transition-transform duration-300 z-50",
-        "md:relative md:translate-x-0 md:w-56",
+        "md:relative md:translate-x-0 md:w-60",
         "fixed top-0 left-0 bottom-0 w-64",
         mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>

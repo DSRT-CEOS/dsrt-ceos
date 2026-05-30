@@ -1,18 +1,41 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const viewport = {
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#0033ff",
 };
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://dsrt-ceos.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: "DSRT CEOS - Construction Enterprise Operating System",
-  description: "AI-powered tender management for Indian construction enterprises",
+  description: "AI-powered tender management, billing, and compliance for Indian construction enterprises",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "DSRT CEOS",
+  },
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "DSRT CEOS",
+    description: "Construction Enterprise OS",
+    images: ["/logo.png"],
+    url: APP_URL,
+    siteName: "DSRT CEOS",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -22,17 +45,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-white antialiased`}>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
+      <body className="font-sans bg-background text-foreground antialiased">
         {children}
         <Toaster
           position="top-right"
           toastOptions={{
             style: {
-              background: "#1e293b",
-              color: "#f1f5f9",
-              border: "1px solid #334155",
+              background: "hsl(0 0% 8%)",
+              color: "hsl(0 0% 96%)",
+              border: "1px solid hsl(0 0% 16%)",
+              fontSize: "13px",
             },
-            success: { iconTheme: { primary: "#f97316", secondary: "#fff" } },
+            success: { iconTheme: { primary: "hsl(226 100% 50%)", secondary: "#fff" } },
+            error: { iconTheme: { primary: "hsl(0 84% 60%)", secondary: "#fff" } },
           }}
         />
       </body>

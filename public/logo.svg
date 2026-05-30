@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+  <rect width="400" height="200" fill="black"/>
+  <!-- DSRT text -->
+  <text x="200" y="85" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="72" font-weight="900" fill="white" letter-spacing="-2">DSRT</text>
+  <!-- CEOS text -->
+  <text x="200" y="175" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="68" font-weight="900" fill="white" letter-spacing="-2">C</text>
+  <text x="265" y="175" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="68" font-weight="900" fill="white" letter-spacing="-2">OS</text>
+  <!-- Blue diamond mark in center of CEOS -->
+  <g transform="translate(232, 130)">
+    <path d="M 0 -22 L 22 -8 L 22 12 L 0 26 L -22 12 L -22 -8 Z" fill="#0033ff" stroke="#0033ff" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="0" cy="-2" r="6" fill="white"/>
+  </g>
+</svg>

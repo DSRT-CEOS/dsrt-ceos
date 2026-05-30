@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, BarChart3, TrendingUp, IndianRupee, Target, Award, AlertCircle, Building2, FileText } from "lucide-react";
+import { Loader2, Download, BarChart3, TrendingUp, IndianRupee, Target, Award, AlertCircle, Building2, FileText } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -14,6 +15,9 @@ const COLORS = ["#f97316", "#10b981", "#3b82f6", "#a855f7", "#eab308", "#ef4444"
 export default function ReportsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const exportData = (type: string) => {
+    window.location.href = `/api/reports/export?type=${type}&format=csv`;
+  };
 
   useEffect(() => {
     fetch("/api/reports/overview").then(r => r.json()).then(d => {
@@ -32,6 +36,11 @@ export default function ReportsPage() {
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2"><BarChart3 className="w-6 h-6 text-orange-400" />Reports & Analytics</h1>
         <p className="text-slate-400 text-sm mt-1">Real-time insights from your business data</p>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Button onClick={() => exportData("bills")} variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export Bills CSV</Button>
+        <Button onClick={() => exportData("projects")} variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export Projects CSV</Button>
+        <Button onClick={() => exportData("tenders")} variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export Tenders CSV</Button>
       </div>
 
       {/* Hero stats */}

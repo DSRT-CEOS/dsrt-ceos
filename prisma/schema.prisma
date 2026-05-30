@@ -59,6 +59,8 @@ model Company {
   
   workers           Worker[]
   invites           TeamInvite[]
+  subcontractors    SubContractor[]
+  gstInvoices       GSTInvoice[]
   @@map("companies")
 }
 
@@ -424,6 +426,8 @@ model Project {
   workers              Worker[]
   progressPhotos       ProgressPhoto[]
   siteDiaries          SiteDiary[]
+  subAssignments       SubContractorAssignment[]
+  mbEntries            MBEntry[]
   @@map("projects")
 }
 
@@ -746,4 +750,133 @@ model TeamInvite {
   acceptedAt  DateTime?
   @@unique([companyId, email])
   @@map("team_invites")
+}
+
+// ============================================
+// SUB-CONTRACTORS
+// ============================================
+
+model SubContractor {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name              String
+  contactPerson     String?
+  phone             String?
+  email             String?
+  panNumber         String?
+  gstNumber         String?
+  address           String?
+  specialization    String[]
+  bankAccount       String?
+  bankIfsc          String?
+  notes             String?
+  rating            Int?
+  isActive          Boolean  @default(true)
+  totalAwarded      Decimal  @db.Decimal(15, 2) @default(0)
+  totalPaid         Decimal  @db.Decimal(15, 2) @default(0)
+  assignments       SubContractorAssignment[]
+  payments          SubContractorPayment[]
+  @@map("subcontractors")
+}
+
+model SubContractorAssignment {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  subContractorId   String
+  subContractor     SubContractor @relation(fields: [subContractorId], references: [id], onDelete: Cascade)
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workDescription   String
+  contractAmount    Decimal  @db.Decimal(15, 2)
+  startDate         DateTime?
+  endDate           DateTime?
+  status            String   @default("ACTIVE")
+  notes             String?
+  @@map("subcontractor_assignments")
+}
+
+model SubContractorPayment {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  subContractorId   String
+  subContractor     SubContractor @relation(fields: [subContractorId], references: [id], onDelete: Cascade)
+  projectId         String?
+  amount            Decimal  @db.Decimal(15, 2)
+  paymentDate       DateTime
+  paymentMethod     String   @default("BANK_TRANSFER")
+  reference         String?
+  tdsDeducted       Decimal  @db.Decimal(15, 2) @default(0)
+  notes             String?
+  @@map("subcontractor_payments")
+}
+
+// ============================================
+// MEASUREMENT BOOK
+// ============================================
+
+model MBEntry {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mbNumber        String
+  pageNumber      String?
+  date            DateTime
+  boqItemId       String?
+  itemDescription String
+  unit            String
+  location        String?
+  length          Decimal? @db.Decimal(15, 3)
+  breadth         Decimal? @db.Decimal(15, 3)
+  height          Decimal? @db.Decimal(15, 3)
+  number          Decimal? @db.Decimal(15, 3) @default(1)
+  deduction       Decimal? @db.Decimal(15, 3) @default(0)
+  netQuantity     Decimal  @db.Decimal(15, 3)
+  remarks         String?
+  measuredBy      String?
+  checkedBy       String?
+  isBilled        Boolean  @default(false)
+  billId          String?
+  @@map("mb_entries")
+}
+
+// ============================================
+// GST INVOICES
+// ============================================
+
+model GSTInvoice {
+  id                  String   @id @default(cuid())
+  createdAt           DateTime @default(now())
+  companyId           String
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  projectId           String?
+  billId              String?
+  invoiceNumber       String
+  invoiceDate         DateTime
+  buyerName           String
+  buyerGstin          String?
+  buyerAddress        String?
+  buyerStateCode      String?
+  placeOfSupply       String?
+  itemDescription     String
+  hsnSacCode          String?
+  quantity            Decimal  @db.Decimal(15, 3) @default(1)
+  unit                String   @default("Job")
+  rate                Decimal  @db.Decimal(15, 2)
+  taxableValue        Decimal  @db.Decimal(15, 2)
+  cgstRate            Decimal  @db.Decimal(5, 2)  @default(9)
+  cgstAmount          Decimal  @db.Decimal(15, 2) @default(0)
+  sgstRate            Decimal  @db.Decimal(5, 2)  @default(9)
+  sgstAmount          Decimal  @db.Decimal(15, 2) @default(0)
+  igstRate            Decimal  @db.Decimal(5, 2)  @default(0)
+  igstAmount          Decimal  @db.Decimal(15, 2) @default(0)
+  totalAmount         Decimal  @db.Decimal(15, 2)
+  amountInWords       String?
+  isInterState        Boolean  @default(false)
+  invoiceFileUrl      String?
+  notes               String?
+  @@map("gst_invoices")
 }

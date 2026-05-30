@@ -25,7 +25,7 @@ export default function BillingPage() {
           <h1 className="text-2xl font-bold text-white flex items-center gap-2"><Receipt className="w-6 h-6 text-orange-400" />RA Bills</h1>
           <p className="text-slate-400 text-sm mt-1">Running Account bills with auto-calculated deductions</p>
         </div>
-        <Link href="/dashboard/billing/new"><Button className="bg-orange-500 hover:bg-orange-600"><Plus className="w-4 h-4 mr-2" />New Bill</Button></Link>
+        <Link href="/dashboard/billing/gst-invoices"><Button variant="outline" className="mr-2">GST Invoices</Button></Link>`n          <Link href="/dashboard/billing/new"><Button className="bg-orange-500 hover:bg-orange-600"><Plus className="w-4 h-4 mr-2" />New Bill</Button></Link>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -53,7 +53,7 @@ export default function BillingPage() {
           <Receipt className="w-16 h-16 text-slate-700 mx-auto mb-4" />
           <h3 className="text-white font-semibold text-lg mb-2">No bills yet</h3>
           <p className="text-slate-500 text-sm mb-6">Create your first RA Bill with auto-calculated SD, TDS, GST, Labour Cess.</p>
-          <Link href="/dashboard/billing/new">
+          <Link href="/dashboard/billing/gst-invoices"><Button variant="outline" className="mr-2">GST Invoices</Button></Link>`n          <Link href="/dashboard/billing/new">
             <Button className="bg-orange-500 hover:bg-orange-600"><Plus className="w-4 h-4 mr-2" />Create Bill</Button>
           </Link>
         </CardContent></Card>

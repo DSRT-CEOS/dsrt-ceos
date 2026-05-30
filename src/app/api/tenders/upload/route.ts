@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
@@ -23,27 +25,47 @@ export async function POST(request: NextRequest) {
 
     for (const file of files) {
       try {
+        if (file.size === 0) {
+          results.push({ name: file.name, success: false, error: "Empty file" });
+          continue;
+        }
+
         const buffer = Buffer.from(await file.arrayBuffer());
         const sanitized = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
         const path = `${dbUser.companyId}/${Date.now()}_${sanitized}`;
 
-        const { error } = await service.storage.from("tender-documents").upload(path, buffer, {
-          contentType: file.type, upsert: false,
-        });
+        console.log("Uploading to tender-documents bucket, path:", path, "size:", buffer.length);
 
-        if (error) {
-          results.push({ name: file.name, success: false, error: error.message });
+        const { data: upData, error: upError } = await service.storage
+          .from("tender-documents")
+          .upload(path, buffer, {
+            contentType: file.type || "application/pdf",
+            upsert: false,
+          });
+
+        if (upError) {
+          console.error("Storage upload error:", JSON.stringify(upError));
+          results.push({
+            name: file.name,
+            success: false,
+            error: `Upload failed: ${upError.message}. Check that 'tender-documents' bucket exists in Supabase.`
+          });
           continue;
         }
 
-        const { data: { publicUrl } } = service.storage.from("tender-documents").getPublicUrl(path);
+        console.log("Upload successful:", upData?.path);
+
+        // Use signed URL instead of public URL (since bucket is private)
+        const { data: signedData } = await service.storage
+          .from("tender-documents")
+          .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
 
         const tender = await prisma.tender.create({
           data: {
             uploadedById: dbUser.companyId,
             sourceType: "USER_UPLOAD",
             workName: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-            originalFileUrl: publicUrl,
+            originalFileUrl: signedData?.signedUrl || "",
             originalFilePath: path,
             originalFileName: file.name,
             processingStatus: "PENDING",
@@ -52,10 +74,11 @@ export async function POST(request: NextRequest) {
         });
 
         // Process in background
-        processTender(tender.id).catch(console.error);
+        processTender(tender.id).catch(err => console.error("Background process err:", err));
 
         results.push({ id: tender.id, name: file.name, success: true });
       } catch (err: any) {
+        console.error("File processing error:", err);
         results.push({ name: file.name, success: false, error: err.message });
       }
     }
@@ -66,8 +89,8 @@ export async function POST(request: NextRequest) {
       results,
       message: `${successCount} of ${files.length} tenders uploaded. AI analyzing in background.`
     });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Err";
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  } catch (err: any) {
+    console.error("Upload API err:", err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

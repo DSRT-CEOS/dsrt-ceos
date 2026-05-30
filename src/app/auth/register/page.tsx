@@ -89,7 +89,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <Link href="/" className="flex justify-center mb-8">
-          <Logo size="lg" />
+          <Logo size="md" />
         </Link>
 
         <div className="text-center mb-6">
@@ -135,7 +135,7 @@ export default function RegisterPage() {
                     <Label>Password (min 8 characters) *</Label>
                     <Input type="password" value={userData.password}
                       onChange={(e) => setUserData({ ...userData, password: e.target.value })}
-                      placeholder="••••••••" required minLength={8} />
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required minLength={8} />
                   </div>
                   <Button type="submit" className="w-full">
                     Next <ArrowRight className="w-4 h-4 ml-1" />
